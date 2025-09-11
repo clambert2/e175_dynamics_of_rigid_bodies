@@ -1,0 +1,11 @@
+% Define rigid body frames
+RigidFrame A, B, C, R 
+Variable qA'', qB'', qC''
+
+% Define rotations between the frames
+B.RotateZ(A, qA)
+C.RotateY(B, qB)
+R.RotateX(C, qC)
+
+w_R_A> % Angular Velocity of R in A
+alf_R_A> % Angular Acceleration of R in A
