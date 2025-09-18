@@ -1,0 +1,93 @@
+   (1) % Define system components
+   (2) RigidFrame N, T, S, F, C
+   (3) Point H, K, A, P, O
+   (4) % Define constants 
+   (5) Constant LC = 0.170 meters
+   (6) Constant LF = 0.198 meters
+   (7) Constant LS = 0.438 meters
+   (8) Constant LT = 0.432 meters
+   (9) Constant y = 0.804 meters
+   (10) Constant x = 0.246 meters
+   (11) % Create angle variables
+   (12) % make sure to include '' so their second derivative variable will be created such that we can then do motion analysis and plot them
+   (13) Variable q1'', q2'', q3'', q4''
+   (14) BasisSubscripts 1,2,3
+   (15) % Connect each rigid frame
+   (16) T.RotateZ(N, q4)
+-> (17) T_N = [cos(q4), sin(q4), 0;  -sin(q4), cos(q4), 0;  0, 0, 1]
+-> (18) w_T_N> = q4'*T3>
+-> (19) alf_T_N> = q4''*T3>
+
+   (20) S.RotateZ(N, -q3)
+-> (21) S_N = [cos(q3), -sin(q3), 0;  sin(q3), cos(q3), 0;  0, 0, 1]
+-> (22) w_S_N> = -q3'*S3>
+-> (23) alf_S_N> = -q3''*S3>
+
+   (24) F.RotateZ(N, q2)
+-> (25) F_N = [cos(q2), sin(q2), 0;  -sin(q2), cos(q2), 0;  0, 0, 1]
+-> (26) w_F_N> = q2'*F3>
+-> (27) alf_F_N> = q2''*F3>
+
+   (28) C.RotateZ(N, -q1)
+-> (29) C_N = [cos(q1), -sin(q1), 0;  sin(q1), cos(q1), 0;  0, 0, 1]
+-> (30) w_C_N> = -q1'*C3>
+-> (31) alf_C_N> = -q1''*C3>
+
+   (32) % Define each linkage within each rigid frame
+   (33) P_P_O> = LC*c1>
+-> (34) P_P_O> = LC*C1>
+
+   (35) P_A_P> = LF*f1>
+-> (36) P_A_P> = LF*F1>
+
+   (37) P_K_A> = LS*s1>
+-> (38) P_K_A> = LS*S1>
+
+   (39) P_H_K> = LT*t2>
+-> (40) P_H_K> = LT*T2>
+
+   (41) % Create a zero vector that splits the x and y components
+   (42) zerovec> = P_H_O> - (y*n1> + x*n2>)
+-> (43) zerovec> = LC*C1> + LF*F1> - y*N1> - x*N2> + LS*S1> + LT*T2>
+
+   (44) zero[1] = Dot( zerovec>, n1>)
+-> (45) zero[1] = LC*cos(q1) + LF*cos(q2) + LS*cos(q3) - y - LT*sin(q4)
+
+   (46) zero[2] = Dot( zerovec>, n2>)
+-> (47) zero[2] = LF*sin(q2) + LT*cos(q4) - x - LC*sin(q1) - LS*sin(q3)
+
+   (48) % Set the initial angles for q1 and q2
+   (49) deg2rad = units(deg,rad)
+-> (50) deg2rad = 0.01745329
+
+   (51) Input q1 = 45*units(deg,rad)
+   (52) Input q2 = 38*units(deg,rad)
+   (53) % Solve the nonlinear equations
+   (54) % First part sets the equation to zero and second parts are guesses for the nonlinear solver
+   (55) Solve(zero = 0, q3 = 45*units(deg,rad), q4 = 38*units(deg,rad))
+-> (56) q3 = 0.3974628
+-> (57) q4 = -0.2909137
+
+   (58) % One way to see results in degrees. Always solve nonlinear problems in radians!
+   (59) q3deg=explicit(q3/deg2rad)
+-> (60) q3deg = 22.77294
+
+   (61) q4deg=explicit(q4/deg2rad)
+-> (62) q4deg = -16.66813
+
+   (63) % set velocity
+   (64) v_H_N> = 0> % I know the velocity of H in N is a zero vector since H is in N
+-> (65) v_H_N> = 0>
+
+   (66) K.setVelocity(N, H, T) % I know that H is fixed in N and I know that H and K are fixed on T
+-> (67) v_K_N> = -LT*q4'*T1>
+
+   (68) A.setvelocity(N, K, S) % repeating same process
+-> (69) v_A_N> = -LS*q3'*S2> - LT*q4'*T1>
+
+   (70) P.setVelocity(N, A, F)
+-> (71) v_P_N> = LF*q2'*F2> - LS*q3'*S2> - LT*q4'*T1>
+
+   (72) 
+
+ setvelocity

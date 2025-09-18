@@ -45,9 +45,16 @@ Solve(zero = 0, q3 = 45*units(deg,rad), q4 = 38*units(deg,rad))
 q3deg=explicit(q3/deg2rad)
 q4deg=explicit(q4/deg2rad)
 
-% set velocity
+% find velocity
 v_H_N> = 0> % I know the velocity of H in N is a zero vector since H is in N
-
 K.setVelocity(N, H, T) % I know that H is fixed in N and I know that H and K are fixed on T
+A.setvelocity(N, K, S) % repeating same process
+P.setVelocity(N, A, F)
 
+% find accelerations
+A_H_N> = 0> % Telling it that there is an acceleration that is known
+K.setAcceleration(N, H, T)
+A.setAcceleration(N, K, S)
+P.setAcceleration(N, A, F)
 
+% There is a setVelocityAcceleration() that does both at the same time

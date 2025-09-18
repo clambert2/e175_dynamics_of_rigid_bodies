@@ -1,7 +1,6 @@
 % Define system components
 RigidFrame N, T, S, F, C
 Point H, K, A, P, O
-
 % Define constants 
 Constant LC = 0.170 meters
 Constant LF = 0.198 meters
@@ -9,45 +8,42 @@ Constant LS = 0.438 meters
 Constant LT = 0.432 meters
 Constant y = 0.804 meters
 Constant x = 0.246 meters
-
 % Create angle variables
 % make sure to include '' so their second derivative variable will be created such that we can then do motion analysis and plot them
 Variable q1'', q2'', q3'', q4''
 BasisSubscripts 1,2,3
-
 % Connect each rigid frame
 T.RotateZ(N, q4)
 S.RotateZ(N, -q3)
 F.RotateZ(N, q2)
 C.RotateZ(N, -q1)
-
 % Define each linkage within each rigid frame
 P_P_O> = LC*c1>
 P_A_P> = LF*f1>
 P_K_A> = LS*s1>
 P_H_K> = LT*t2>
-
 % Create a zero vector that splits the x and y components
 zerovec> = P_H_O> - (y*n1> + x*n2>)
 zero[1] = Dot( zerovec>, n1>)
 zero[2] = Dot( zerovec>, n2>)
-
 % Set the initial angles for q1 and q2
 deg2rad = units(deg,rad)
 Input q1 = 45*units(deg,rad)
 Input q2 = 38*units(deg,rad)
-
 % Solve the nonlinear equations
 % First part sets the equation to zero and second parts are guesses for the nonlinear solver
 Solve(zero = 0, q3 = 45*units(deg,rad), q4 = 38*units(deg,rad))
-
 % One way to see results in degrees. Always solve nonlinear problems in radians!
 q3deg=explicit(q3/deg2rad)
 q4deg=explicit(q4/deg2rad)
-
-% set velocity
+% find velocity
 v_H_N> = 0> % I know the velocity of H in N is a zero vector since H is in N
-
 K.setVelocity(N, H, T) % I know that H is fixed in N and I know that H and K are fixed on T
-
-
+A.setvelocity(N, K, S) % repeating same process
+P.setVelocity(N, A, F)
+% find accelerations
+A_H_N> = 0> % Telling it that there is an acceleration that is known
+K.setAcceleration(N, H, T)
+A.setAcceleration(N, K, S)
+P.setAcceleration(N, A, F)
+% There is a setVelocityAcceleration() that does both at the same time

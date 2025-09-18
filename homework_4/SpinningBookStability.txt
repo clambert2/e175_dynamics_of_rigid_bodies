@@ -1,0 +1,32 @@
+%  Torque Free Motion of a Spinning Book
+
+RigidFrame N,B
+Variable   wx', wy', wz'   % Angular velocity components
+Constant   Ixx, Iyy, Izz   % Moments of Inertia
+
+% ————Angular momentum principle———
+w_B_N> = wx*bx> + wy*by> + wz*bz>
+H_B_Bcm_N> = Ixx*wx*bx> + Iyy*wy*by> + Izz*wz*bz>
+zerovec> = Dt(H_B_Bcm_N>,N)    % minus moment of all forces, which is zero here
+
+% ——————-Scalar Equations———————
+zero[1] = Dot(zerovec>, bx> )
+zero[2] = Dot(zerovec>, by> )
+zero[3] = Dot(zerovec>, bz> )
+
+Solve(zero, wx',wy',wz')
+
+%-------- Angular momentum and rotational kinetic energy ------------
+Hmag = sqrt(Dot(H_B_Bcm_N>,H_B_Bcm_N>))
+K = 1/2*(Ixx*wx^2 + Iyy*wy^2 + Izz*wz^2)
+
+%--------------------------------------------------------------------
+Input   tFinal=4, integStp=0.02    % Integration parameters
+Input   Ixx=1,  Iyy=2,  Izz=3      % Constant values (would include units if problem had them)
+Input   wx=0.2, wy=7, wz=0.2       % Initial values
+OutputPlot  t, wx, wy, wz
+OutputPlot  t, Hmag, K
+ODE() SpinningBookHW.m
+
+
+
