@@ -1,0 +1,14 @@
+% (a)
+% Define rigid frames
+RigidFrame A, B, C, D
+% Define variables
+Variable qh'', ql'', qs''
+% Define rotations between each frame
+B.RotateZ(A, -qh)
+C.RotateX(B, ql)
+D.RotateY(C, -qs)
+% (b)
+% Solve for the angular velocity of D in A
+% (c)
+% Solve for the angular acceleration of D in A
+Express(alf_A_D>, C)

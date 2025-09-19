@@ -1,0 +1,45 @@
+
+   (1) % (a)
+   (2)
+   (2) % Define rigid frames
+   (3) RigidFrame A, B, C, D
+   (4)
+   (4) % Define variables
+   (5) Variable qh'', ql'', qs''
+   (6)
+   (6) % Define rotations between each frame
+   (7) B.RotateZ(A, -qh)
+-> (8) B_A = [cos(qh), -sin(qh), 0;  sin(qh), cos(qh), 0;  0, 0, 1]
+-> (9) w_B_A> = -qh'*Bz>
+-> (10) alf_B_A> = -qh''*Bz>
+
+   (11) w_A_B>
+ Result = qh'*Bz>
+   (11) alf_A_B>
+ Result = qh''*Bz>
+   (11) C.RotateX(B, ql)
+-> (12) C_B = [1, 0, 0;  0, cos(ql), sin(ql);  0, -sin(ql), cos(ql)]
+-> (13) w_C_B> = ql'*Cx>
+-> (14) alf_C_B> = ql''*Cx>
+
+   (15) w_B_C>
+ Result = -ql'*Cx>
+   (15) alf_B_C>
+ Result = -ql''*Cx>
+   (15) D.RotateY(C, -qs)
+-> (16) D_C = [cos(qs), 0, sin(qs);  0, 1, 0;  -sin(qs), 0, cos(qs)]
+-> (17) w_D_C> = -qs'*Dy>
+-> (18) alf_D_C> = -qs''*Dy>
+
+   (19)
+   (19) % (b)
+   (20)
+   (20) % Solve for the angular velocity of D in A
+   (21) Express(w_A_D>, C)
+ Result = -ql'*Cx> + (qs'+sin(ql)*qh')*Cy> + cos(ql)*qh'*Cz>
+   (21)
+   (21) % (c)
+   (22)
+   (22) % Solve for the angular acceleration of D in A
+   (23) Express(alf_A_D>, C)
+ Result = (cos(ql)*qh'*qs'-ql'')*Cx> + (cos(ql)*qh'*ql'+qs''+sin(ql)*qh'')*Cy> + (ql'*qs'+cos(ql)*qh''-sin(ql)*qh'*ql')*Cz>
