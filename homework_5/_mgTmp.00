@@ -1,0 +1,27 @@
+% Define frames, variables, constants, and points
+RigidFrame N, B
+Variable y'', theta''
+Constant ln = 0.5 m
+Constant K = 100 N/m
+Constant m = 1 kg
+Constant g = 9.81 m/s^2
+Point N0(N), P(B)
+% Define rotation between frames
+B.RotateZ(N, theta)
+% Define position vector from N0 to P
+p_N0_P> = (-ln - y)*by>
+% Define velocity and acceleration of point P in frame N
+v_N0_N> = 0>
+P.SetVelocity(N, Dt(p_N0_P>, N))
+P.SetAcceleration(N, Dt(v_P_N>, N))
+% Define a force vector acting on point P
+F_P> = K*y*by> - m*g*ny>
+% Create F = ma equations for both the x and y in N
+eqns[1] = Dot(F_P>, ny>) - m*Dot(a_P_N>, ny>)
+eqns[2] = Dot(F_P>, nx>) - m*Dot(a_P_N>, nx>)
+% Solve for y'' and theta''
+Solve(eqns = 0, y'', theta'')
+Input tFinal=16, integStp=0.01 % Integration parameters
+Input y = 0.2, y' = 0, theta = 0.0174533, theta' = 0 % Integration initial conditions
+OutputPlot t, theta % Values that I want plotted
+ODE() hw_7_13.m

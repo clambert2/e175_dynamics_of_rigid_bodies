@@ -1,0 +1,40 @@
+   (1) % Define frames, variables, constants, and points
+   (2) RigidFrame N, B
+   (3) Variable y'', theta''
+   (4) Constant ln = 0.5 m
+   (5) Constant K = 100 N/m
+   (6) Constant m = 1 kg
+   (7) Constant g = 9.81 m/s^2
+   (8) Point N0(N), P(B)
+   (9)
+   (9) % Define rotation between frames
+   (10) B.RotateZ(N, theta)
+-> (11) B_N = [cos(theta), sin(theta), 0;  -sin(theta), cos(theta), 0;  0, 0, 1]
+-> (12) w_B_N> = theta'*Bz>
+-> (13) alf_B_N> = theta''*Bz>
+
+   (14)
+   (14) % Define position vector from N0 to P
+   (15) p_N0_P> = (-ln - y)*by>
+-> (16) p_N0_P> = (-ln-y)*By>
+
+   (17)
+   (17) % Define velocity and acceleration of point P in frame N
+   (18) v_N0_N> = 0>
+-> (19) v_N0_N> = 0>
+
+   (20) P.SetVelocity(N, Dt(p_N0_P>, N))
+-> (21) v_P_N> = (ln+y)*theta'*Bx> - y'*By>
+
+   (36) Input tFinal=16, integStp=0.01 % Integration parameters
+   (37) Input y = 0.2, y' = 0, theta = 0.0174533, theta' = 0 % Initial conditions
+   (38) OutputPlot t, theta
+   (39) ODE() hw_7_13.m
+The file hw_7_13.m exists.  Overwrite it?  (Y/N): Y
+
+At the MATLAB prompt, type  hw_7_13
+To change input values, edit the file  hw_7_13.m
+
+
+The file created is  hw_7_13.m
+The current working directory is  C:\Users\charl\Documents\GitHub\e175_dynamics_of_rigid_bodies\homework_5
