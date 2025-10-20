@@ -1,0 +1,71 @@
+% E175 Midterm 2025: ball bearings with simulation
+
+
+% a)
+RigidFrame N, A, B, C
+Point A0(A), B0(B), AB(A), BA(B), BN(B), NB(N)
+Constant wAN % Angular velocity of A in N
+Constant rA % Radius of inner radius
+Constant rB % Radius of each ball bearing
+Variable qB'', qC'' % Define angles for Bearing frames
+
+
+% b)  Rotation matrices and angular velocities 
+C.RotateZ(N, qC) % Rotation of C in N
+B.RotateZ(C, qB) % Rotation of B in N
+A.setAngularVelocity(N, wAN*Nz>) % Define angular velocity of A in N
+w_B_N>
+
+% c) Positions and velocities
+p_A0_AB> = rA*Cx>
+p_B0_BA> = -rB*Cx>
+p_B0_BN> = rB*Cx>
+p_A0_B0> = (rA + rB)*Cx>
+v_A0_N> = 0>
+v_NB_N> = 0>
+AB.SetVelocity(N, A0)
+B0.SetVelocity(N, A0, C)
+
+
+% d) Rolling constraints
+eqn[1] = dot(v_B0_N> + Cross(w_B_N>, p_B0_BA>) - v_AB_N>, Cy> )
+eqn[2] = dot(v_B0_N> + Cross(w_B_N>, p_B0_BN>), Cy>)
+
+% Solve ...
+solve(eqn = 0, qB', qC')
+
+% e) Find key values using numerical input parameters given 
+Input rA = 0.5 in, rB = 0.075 in, wAN = 360*ConvertUnits(rpm,rad/sec)
+
+wBN = EvaluateAtInput(qB')     %rad/sec
+BRPM = wBN*60/(2*pi)
+wCN = EvaluateAtInput(qC')     %rad/sec
+vBN = EvaluateAtInput(dot(V_B0_N>, Cy>)) %in/sec
+numRotationsPerSec = WCN/(2*pi)
+numRotationsPerMin = WCN/(2*pi)*60 % Number of rotations that the bearing makes per minute
+
+% Prepare for simulation (nothing for you to do here)
+Point B2(B)
+P_B0_B2> = rB*bx>
+
+
+% f) Simulation
+
+Input  tFinal=2.5/NumRotationsPerSec sec, tStep=0.001 sec
+plotx = Dot(P_A0_B2>, nx>)
+ploty = Dot(P_A0_B2>, ny>)
+OutputPlot(plotx,ploty)
+ODE() Midterm_template_f25.m
+
+% RESULTS
+% Magnitude of Angular Velocty of B in N: -142.0546 (rad/sec) or -1356.522 (RPM)
+% Magnitude of Velocity of B0 in: 0.2393894 (inches/sec)
+% Number of times ball bearing rotates around race per min: 156.5217 (RPM)
+% Comments: 
+% B2 does have the expected shape. It moves around in a circle and then 
+% itself has arcs on the outside as it moves in a circle. Important to note that
+% the units on the plot are in m and not inches
+
+save Midterm_template_f25_output.all
+
+

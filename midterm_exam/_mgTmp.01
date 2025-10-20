@@ -1,0 +1,107 @@
+   (1) % E175 Midterm 2025: ball bearings with simulation
+   (2) % a)
+   (3) RigidFrame N, A, B, C
+   (4) Point A0(A), B0(B), AB(A), BA(B), BN(B), NB(N)
+   (5) Constant wAN % Angular velocity of A in N
+   (6) Constant rA % Radius of inner radius
+   (7) Constant rB % Radius of each ball bearing
+   (8) Variable qB'', qC'' % Define angles for Bearing frames
+   (9) % b)  Rotation matrices and angular velocities 
+   (10) C.RotateZ(N, qC) % Rotation of C in N
+-> (11) C_N = [cos(qC), sin(qC), 0;  -sin(qC), cos(qC), 0;  0, 0, 1]
+-> (12) w_C_N> = qC'*Cz>
+-> (13) alf_C_N> = qC''*Cz>
+
+   (14) B.RotateZ(C, qB) % Rotation of B in N
+-> (15) B_C = [cos(qB), sin(qB), 0;  -sin(qB), cos(qB), 0;  0, 0, 1]
+-> (16) w_B_C> = qB'*Bz>
+-> (17) alf_B_C> = qB''*Bz>
+
+   (18) A.setAngularVelocity(N, wAN*Nz>) % Define angular velocity of A in N
+-> (19) w_A_N> = wAN*Nz>
+
+   (20) % c) Positions and velocities
+   (21) p_A0_AB> = rA*Cx>
+-> (22) p_A0_AB> = rA*Cx>
+
+   (23) p_B0_BA> = -rB*Cx>
+-> (24) p_B0_BA> = -rB*Cx>
+
+   (25) p_B0_BN> = rB*Cx>
+-> (26) p_B0_BN> = rB*Cx>
+
+   (27) p_A0_B0> = (rA + rB)*Cx>
+-> (28) p_A0_B0> = (rA+rB)*Cx>
+
+   (29) v_A0_N> = 0>
+-> (30) v_A0_N> = 0>
+
+   (31) v_NB_N> = 0>
+-> (32) v_NB_N> = 0>
+
+   (33) AB.SetVelocity(N, A0)
+-> (34) v_AB_N> = rA*wAN*Cy>
+
+   (35) B0.SetVelocity(N, A0, C)
+-> (36) v_B0_N> = (rA+rB)*qC'*Cy>
+
+   (37) % d) Rolling constraints
+   (38) eqn[1] = dot(v_B0_N> + Cross(w_B_N>, p_B0_BA>) - v_AB_N>, Cy> )
+-> (39) eqn[1] = rA*qC' - rA*wAN - rB*qB'
+
+   (40) eqn[2] = dot(v_B0_N> + Cross(w_B_N>, p_B0_BN>), Cy>)
+-> (41) eqn[2] = rB*qB' + (rA+2*rB)*qC'
+
+   (42) % Solve ...
+   (43) solve(eqn = 0, qB', qC')
+-> (44) qB' = -0.5*rA*wAN*(rA+2*rB)/(rB*(rA+rB))
+-> (45) qC' = 0.5*rA*wAN/(rA+rB)
+
+   (46) % e) Find key values using numerical input parameters given 
+   (47) Input rA = 0.5 in, rB = 0.075 in, wAN = 360*ConvertUnits(rpm,rad/sec)
+   (48) wBN = EvaluateAtInput(qB')     %rad/sec
+-> (49) wBN = -142.0546
+
+   (50) BRPM = wBN*60/(2*pi)
+-> (51) BRPM = -1356.522
+
+   (52) wCN = EvaluateAtInput(qC')     %rad/sec
+-> (53) wCN = 16.39092
+
+   (54) vBN = EvaluateAtInput(dot(V_B0_N>, Cy>)) %in/sec
+-> (55) vBN = 0.2393894
+
+   (56) numRotationsPerSec = WCN/(2*pi)
+-> (57) numRotationsPerSec = 2.608696
+
+   (58) numRotationsPerMin = WCN/(2*pi)*60 % Number of rotations that the bearing makes per minute
+-> (59) numRotationsPerMin = 156.5217
+
+   (60) % Prepare for simulation (nothing for you to do here)
+   (61) Point B2(B)
+   (62) P_B0_B2> = rB*bx>
+-> (63) P_B0_B2> = rB*Bx>
+
+   (64) % f) Simulation
+   (65) Input  tFinal=2.5/NumRotationsPerSec sec, tStep=0.001 sec
+   (66) plotx = Dot(P_A0_B2>, nx>)
+-> (67) plotx = rB*cos(qB+qC) + (rA+rB)*cos(qC)
+
+   (68) ploty = Dot(P_A0_B2>, ny>)
+-> (69) ploty = rB*sin(qB+qC) + (rA+rB)*sin(qC)
+
+   (70) OutputPlot(plotx,ploty)
+   (71) ODE() Midterm_template_f25.m
+-> (72) qB'' = 0
+-> (73) qC'' = 0
+
+   (74) % RESULTS
+   (75) % Magnitude of Angular Velocty of B in N: -142.0546 (rad/sec) or -1356.522 (RPM)
+   (76) % Magnitude of Velocity of B0 in: 0.2393894 (inches/sec)
+   (77) % Number of times ball bearing rotates around race per min: 156.5217 (RPM)
+   (78) % Comments: 
+   (79) % B2 does have the expected shape. It moves around in a circle and then 
+   (80) % itself has arcs on the outside as it moves in a circle. Important to note that
+   (81) % the units on the plot are in m and not inches
+   (82) 
+ve Midterm_template_f25_output.all
