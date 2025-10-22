@@ -1,0 +1,49 @@
+   (1) % Define all frames
+   (2) RigidFrame S
+   (3) RigidBody A, B, C
+   (4) % Define point O
+   (5) Point O
+   (6) % Setup all constants
+   (7) Constant m = 13.45 kg % mass of the system
+   (8) Constant aw = 120 mm 
+   (9) Constant al = 110 mm
+   (10) Constant bh = 100 mm
+   (11) Constant bl = 210 mm
+   (12) Constant cr = 35 mm 
+   (13) Constant ccml = 160 mm
+   (14) Constant ccmh = 50 mm
+   (15) Constant Aarea = aw*al
+-> (16) Aarea = al*aw
+
+   (17) Constant Barea = bh*bl
+-> (18) Barea = bh*bl
+
+   (19) Constant Carea = pi*cr^2
+-> (20) Carea = pi*cr^2
+
+   (21) Constant Sarea = Aarea + Barea - Carea
+-> (22) Sarea = Aarea + Barea - Carea
+
+   (23) Constant mA = m * Aarea/Sarea
+-> (24) mA = Aarea*m/Sarea
+
+   (25) Constant mB = m * Barea/Sarea
+-> (26) mB = Barea*m/Sarea
+
+   (27) Constant mC = - m * Carea/Sarea
+-> (28) mC = -Carea*m/Sarea
+
+   (29) % Setup Intertia dyadic for A
+   (30) Axx = (1/12)*mA*aw
+-> (31) Axx = 0.08333333*aw*mA
+
+   (32) Ayy = (1/12)*mA*al
+-> (33) Ayy = 0.08333333*al*mA
+
+   (34) Azz = Axx + Ayy
+-> (35) Azz = Axx + Ayy
+
+   (36) A.SetInertia(Acm, S, Axx, Ayy, Azz)
+   (37) % Setup Intertia dyadic for B
+   (38) % A.SetInertia()
+   (39) 
