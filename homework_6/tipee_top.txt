@@ -1,7 +1,7 @@
 % Tippee top mass properties
-
 RigidFrame C       
-Point Ccm(C)
+Point C0(C), Ccm(C)
+RigidBody R, CC, PS
 Constant Rs, l, d, h, r       % Parameters on drawing
 Constant Ixx, Iyy, Izz, k        % You will define for whole top in C vectors
 Constant g, rho                  % Gravity, density of wood
@@ -9,22 +9,46 @@ Constant mPS, dPS, IPSzz, IPSxx  % Parameters for sphere without cap (see table)
 
 
 % Mass property expressions ----------------------------
- 
 
+% Center of mass calculations
+mR = pi*r^2*h*rho % mass of the cylindrical rod
+mCC = -pi*d/2*(l - h)*rho % mass of the cylindrical cutout
+p_C0_Rcm> = (h/2)*cz> % position of rod cm
+p_C0_CCcm> = (l/2)*cz> % position of cutout cm
+p_C0_PScm> = -dPS*cz> % position of sphere cm
+mC = mPS + mR + mCC % total mass 
+kvec> = (1/mC)*(mPS*p_C0_PScm> + mR*p_C0_Rcm> + mCC*p_C0_CCcm>) % total cm position
+p_C0_Ccm> = kvec> % position of top cm
 
+% Inertia dyadic calculations ----------------------------
 
+% Rod inertia about its cm
+IRcm_xx = (1/12)*mR*(3*r^2 + h^2)
+IRcm_yy = IRcm_xx
+IRcm_zz = (1/2)*mR*r^2
+R.SetInertia(Rcm, C, IRcm_xx, IRcm_yy, IRcm_zz)
+I_R_C0>> = I_R_Rcm>> + mR*(1>>*Dot(P_Ccm_Rcm>,P_Ccm_Rcm>) - P_Ccm_Rcm>*P_Ccm_Rcm>)
+
+% Cutout inertia about its cm
+ICCcm_xx = (1/12)*mCC*(3*(d/2)^2 + (l - h)^2)
+ICCcm_yy = ICCcm_xx
+ICCcm_zz = (1/2)*mCC*(d/2)^2
+CC.SetInertia(CCcm, C, ICCcm_xx, ICCcm_yy, ICCcm_zz)
+I_CC_C0>> = I_CC_CCcm>> + mCC*(1>>*Dot(P_Ccm_CCcm>,P_Ccm_CCcm>) - P_Ccm_CCcm>*P_Ccm_CCcm>)
+
+% Partial sphere inertia about its cm
+PS.SetInertia(PScm, C, IPSxx, IPSxx, IPSzz)
+I_PS_C0>> = I_PS_PScm>> + mPS*(1>>*Dot(P_Ccm_PScm>,P_Ccm_PScm>) - P_Ccm_PScm>*P_Ccm_PScm>)
+
+% Total inertia dyadic about C0
+I_C_C0>> = I_R_C0>> + I_CC_C0>> + I_PS_C0>>
 
 % Numerical evaluations  -------------------------------
-
 Input Rs = 0.019 m, l = 0.016 m, d = 0.022 m
 Input r = 0.0032 m,  h = 0.032 m 
 Input mPS = 0.02 kg, dPS = 4.24e-4 m, IPSzz = 1.47e-6 kg*m^2, IPSxx = 2.83e-6 kg*m^2
 Input g = 9.81 m/s^2, rho = 709 kg/m^3
 
 % An expression has to be in an assignment line to end up in output file
-% e.g. k = EvaluateAtInput(mag(kvec>))
-
-
-
-
-
+k = EvaluateAtInput(mag(kvec>))
+I_C_C0_eval>> = EvaluateAtInput(I_C_C0>>)
