@@ -1,0 +1,39 @@
+% Rod constrained by two springs
+NewtonianFrame N
+RigidFrame A
+Particle b % only declaring one - other will contribute the same; would be okay to do each one separately
+Constant L, h, Mmotor,k, c
+Point P, Q, O(N)
+Variable theta''
+
+% Kinematics -----------------------------------
+A.RotateZ(N, theta)
+p_O_No> = 0>
+p_O_b> = L*Ax>
+p_O_P> = L*Nx> + h*Ny>
+p_b_P> = p_O_P> - p_O_b>  
+
+v_O_N> = 0>
+a_O_N> = 0>
+b.SetVelocity(N, O, A)
+
+% % Mass properties and angular momentum ----------
+b.SetMass(m)
+
+H> = 2*m*Cross(p_O_b>,v_b_N>)
+
+% % Forces and moments ----------------------------
+M_from_H> = DT(H>, N)
+F_Spring> = -k*(sqrt(dot(p_b_P>,p_b_P>)) - h)*b.GetUnitVector(P)
+M_from_F> = 2*Cross(p_O_b>, F_Spring>) + (Mmotor - c*theta')*Az>
+
+% Form governing equation -----------------------
+Z> = M_from_H> - M_from_F>
+Zero = Dot(Z>,Az>)
+solve()
+% Simulation —-----------------------------------
+Input Tfinal=5
+Input h=2, L=1, c=5, k=100, Mmotor=10, m=0.5 %assume this is all in consistent SI units
+Input theta' = 0, theta = 45/180*pi
+Output t,theta
+ODE() RodAndSprings

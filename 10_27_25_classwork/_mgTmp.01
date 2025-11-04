@@ -1,0 +1,60 @@
+   (1) % Rod constrained by two springs
+   (2) NewtonianFrame N
+   (3) RigidFrame A
+   (4) Particle b % only declaring one - other will contribute the same; would be okay to do each one separately
+   (5) Constant L, h, Mmotor,k, c
+   (6) Point P, Q, O(N)
+   (7) Variable theta''
+   (8) % Kinematics -----------------------------------
+   (9) A.RotateZ(N, theta)
+-> (10) A_N = [cos(theta), sin(theta), 0;  -sin(theta), cos(theta), 0;  0, 0, 1]
+-> (11) w_A_N> = theta'*Az>
+-> (12) alf_A_N> = theta''*Az>
+
+   (13) p_O_No> = 0>
+-> (14) p_O_No> = 0>
+
+   (15) p_O_b> = L*Ax>
+-> (16) p_O_b> = L*Ax>
+
+   (17) p_O_P> = L*Nx> + h*Ny>
+-> (18) p_O_P> = L*Nx> + h*Ny>
+
+   (19) p_b_P> = p_O_P> - p_O_b>  
+-> (20) p_b_P> = -L*Ax> + L*Nx> + h*Ny>
+
+   (21) v_O_N> = 0>
+-> (22) v_O_N> = 0>
+
+   (23) a_O_N> = 0>
+-> (24) a_O_N> = 0>
+
+   (25) b.SetVelocity(N, O, A)
+-> (26) v_b_N> = L*theta'*Ay>
+
+   (27) % % Mass properties and angular momentum ----------
+   (28) b.SetMass(m)
+   (29) H> = 2*m*Cross(p_O_b>,v_b_N>)
+-> (30) H> = 2*m*L^2*theta'*Az>
+
+   (31) % % Forces and moments ----------------------------
+   (32) M_from_H> = DT(H>, N)
+-> (33) M_from_H> = 2*m*L^2*theta''*Az>
+
+   (34) F_Spring> = -k*(sqrt(dot(p_b_P>,p_b_P>)) - h)*b.GetUnitVector(P)
+-> (35) F_Spring> = k*L*(-1+h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Ax>
+        + k*L*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Nx>
+        + h*k*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Ny>
+
+   (36) M_from_F> = 2*Cross(p_O_b>, F_Spring>) + (Mmotor - c*theta')*Az>
+-> (37) M_from_F> = (Mmotor+2*h*k*L*cos(theta)*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(
+        theta)-2*L^2*cos(theta)))-2*k*L^2*sin(theta)*(1-h/sqrt(h^2+2*L^2-2*h*L*
+        sin(theta)-2*L^2*cos(theta)))-c*theta')*Nz>
+
+   (38) % Form governing equation -----------------------
+   (39) % Simulation —-----------------------------------
+   (40) Input Tfinal=5
+   (41) Input h=2, L=1, c=5, k=100, Mmotor=10, m=0.5 %assume this is all in consistent SI units
+   (42) Input theta' = 0, theta = 45/180*pi
+   (43) Output t,theta
+   (44) ODE() RodAndSprings
