@@ -1,6 +1,6 @@
 function [t,VAR,Output] = baby_boot
 %===========================================================================
-% File: baby_boot.m created Nov 03 2025 by MotionGenesis 6.5.
+% File: baby_boot.m created Nov 05 2025 by MotionGenesis 6.5.
 % Portions copyright (c) 2009-2025 Motion Genesis LLC.  Rights reserved.
 % MotionGenesis Student Licensee: Charlie Lambert. (until September 2028).
 % This MotionGenesis Student license is granted the right to use this code
@@ -18,7 +18,7 @@ function [t,VAR,Output] = baby_boot
 % in connection with the software or the use or other dealings in the software. 
 %===========================================================================
 eventDetectedByIntegratorTerminate1OrContinue0 = [];
-qADDt=0; qBDDt=0;
+qADDt=0; qBDDt=0; KE=0; PE=0;
 
 
 %-------------------------------+--------------------------+-------------------+-----------------
@@ -70,8 +70,8 @@ if( printIntFile ~= 0 ),  PlotOutputFiles;  end
 function sys = mdlDerivatives( t, VAR, uSimulink )
 %===========================================================================
 SetNamedQuantitiesFromMatrix( VAR );
-qADDt = (g*(mA*LA+mB*LB)*sin(qA)+2*(IBxx-IByy)*sin(qB)*cos(qB)*qADt*qBDt)/(IAxx+IBxx+mA*LA^2-mB*(2*LA*LB-(2*LA-LB)^2)-(IBxx-IByy)*  ...
-sin(qB)^2);
+qADDt = (g*(mA*LA+mB*LB)*sin(qA)+2*(IBxx-IByy)*sin(qB)*cos(qB)*qADt*qBDt)/(IAxx+IBxx+mA*LA^2-mB*(2*LA*LB-(2*LA-LB)*(4*LA-LB))-(IBxx-  ...
+IByy)*sin(qB)^2);
 qBDDt = -(IBxx-IByy)*sin(qB)*cos(qB)*qADt^2/IBzz;
 
 sys = transpose( SetMatrixOfDerivativesPriorToIntegrationStep );
@@ -115,12 +115,16 @@ end
 %===========================================================================
 function Output = mdlOutputs( t, VAR, uSimulink )
 %===========================================================================
-Output = zeros( 1, 4 );
+KE = 0.5*IAxx*qADt^2 + 0.5*IBxx*qADt^2 + 0.5*IBzz*qBDt^2 + 0.5*mA*LA^2*qADt^2 + 0.5*mB*LB^2*qADt^2 - 0.5*(IBxx-IByy)*sin(qB)^2*qADt^2;
+PE = -g*(mA*LA+mB*LB)*cos(qA);
+
+Output = zeros( 1, 5 );
 Output(1) = t;
 Output(2) = qA*RADtoDEG;
+Output(3) = qB*RADtoDEG;
 
-Output(3) = t;
-Output(4) = qB*RADtoDEG;
+Output(4) = t;
+Output(5) = PE+KE;
 end
 
 
@@ -141,26 +145,26 @@ end
 
 if( isempty(hasHeaderInformationBeenWritten) ),
    if( shouldPrintToScreen ),
-      fprintf( 1,                '%%       t             qA\n' );
-      fprintf( 1,                '%%   (second)       (degrees)\n\n' );
+      fprintf( 1,                '%%       t             qA             qB\n' );
+      fprintf( 1,                '%%   (second)       (degrees)      (degrees)\n\n' );
    end
    if( shouldPrintToFile && isempty(FileIdentifier) ),
       FileIdentifier = zeros( 1, 2 );
       FileIdentifier(1) = fopen('baby_boot.1', 'wt');   if( FileIdentifier(1) == -1 ), error('Error: unable to open file baby_boot.1'); end
       fprintf(FileIdentifier(1), '%% FILE: baby_boot.1\n%%\n' );
-      fprintf(FileIdentifier(1), '%%       t             qA\n' );
-      fprintf(FileIdentifier(1), '%%   (second)       (degrees)\n\n' );
+      fprintf(FileIdentifier(1), '%%       t             qA             qB\n' );
+      fprintf(FileIdentifier(1), '%%   (second)       (degrees)      (degrees)\n\n' );
       FileIdentifier(2) = fopen('baby_boot.2', 'wt');   if( FileIdentifier(2) == -1 ), error('Error: unable to open file baby_boot.2'); end
       fprintf(FileIdentifier(2), '%% FILE: baby_boot.2\n%%\n' );
-      fprintf(FileIdentifier(2), '%%       t             qB\n' );
-      fprintf(FileIdentifier(2), '%%   (second)       (degrees)\n\n' );
+      fprintf(FileIdentifier(2), '%%       t            KE+PE\n' );
+      fprintf(FileIdentifier(2), '%%   (second)        (UNITS)\n\n' );
    end
    hasHeaderInformationBeenWritten = 1;
 end
 
-if( shouldPrintToScreen ), WriteNumericalData( 1,                 Output(1:2) );  end
-if( shouldPrintToFile ),   WriteNumericalData( FileIdentifier(1), Output(1:2) );  end
-if( shouldPrintToFile ),   WriteNumericalData( FileIdentifier(2), Output(3:4) );  end
+if( shouldPrintToScreen ), WriteNumericalData( 1,                 Output(1:3) );  end
+if( shouldPrintToFile ),   WriteNumericalData( FileIdentifier(1), Output(1:3) );  end
+if( shouldPrintToFile ),   WriteNumericalData( FileIdentifier(2), Output(4:5) );  end
 end
 
 
@@ -183,16 +187,16 @@ function PlotOutputFiles
 %===========================================================================
 figure;
 data = load( 'baby_boot.1' ); 
-plot( data(:,1),data(:,2),'-b', 'LineWidth',3 );
-legend( 'qA (degrees)' );
-xlabel('t (second)');   ylabel('qA (degrees)');   % title('Some plot title');
+plot( data(:,1),data(:,2),'-b', data(:,1),data(:,3),'-.g', 'LineWidth',3 );
+legend( 'qA (degrees)', 'qB (degrees)' );
+xlabel('t (second)');   % ylabel('Some y-axis label');   title('Some plot title');
 clear data;
 
 figure;
 data = load( 'baby_boot.2' ); 
 plot( data(:,1),data(:,2),'-b', 'LineWidth',3 );
-legend( 'qB (degrees)' );
-xlabel('t (second)');   ylabel('qB (degrees)');   % title('Some plot title');
+legend( 'KE+PE' );
+xlabel('t (second)');   ylabel('KE+PE ');   % title('Some plot title');
 clear data;
 end
 

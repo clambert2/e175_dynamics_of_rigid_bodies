@@ -2,72 +2,52 @@ NewtonianFrame N
 RigidBody A, B 
 Constant LA, LB, g
 Variable qA'', qB''
-
 % Define point positions
 p_No_Acm> = -LA*az>
 p_No_Bcm> = -LB*az>
 p_No_Bo> = -LA*2*az>
-
 % Define rotations
 A.RotateX(N, qA)
 B.RotateZ(A, qB)
-
 % Set mass of objects
 A.SetMass(mA)
 B.SetMass(mB)
-
 % Find the velocity of Bcm in N
 Bcm.SetVelocity(N, No)
-
 % Find the velocity of Bo in N
 Bo.SetVelocity(N, No)
-
 % Find the velocity of Acm in N
 Acm.SetVelocity(N, No)
-
 % Inertia Properties for A
 A.SetInertia(Acm, IAxx, IAxx, 0)
 I_A_No>> = I_A_Acm>> + mA*(1>>*Dot(p_No_Acm>,p_No_Acm>) - p_No_Acm>*p_No_Acm>) % Shift MOI to about No
-
 % Find the interta properties for B
 B.SetInertia(Bcm, IBxx, IByy, IBzz)
 I_B_Bo>> = I_B_Bcm>> + mB*(1>>*Dot(p_Bo_Bcm>,p_Bo_Bcm>) - p_Bo_Bcm>*p_Bo_Bcm>) % Shift MOI to about Bo
-
 % Find the angular momentum of A about No
 H_A_No> = Dot(I_A_No>>, w_N_A>)
-
 % Find angular momentum of B about Bo
 H_B_Bo> = Dot(I_B_Bo>>, w_N_B>) + Cross(p_Bo_Bcm>, mB*v_Bo_N>)
-
 % Fine linear momementum of B in N
 L_B_N> = mB*v_Bcm_N>
-
 % Find angular momentum of B about No
 H_B_No> = H_B_Bo> + Cross(p_No_Bo>, L_B_N>)
-
 % Create gravitational force vectors
 F_B_N> = -mB*g*nz>
 F_A_N> = -mA*g*nz>
-
 % Find moments for all forces about No
 M_B_No> = Cross(p_No_Bcm>, F_B_N>)
 M_A_No> = Cross(p_No_Acm>, F_A_N>)
-
 % Find moments for all forces about Bo
 M_B_Bo> = Cross(p_Bcm_Bo>, F_B_N>)
-
 % Formulate the first angular momentum principle
 amp[1] = Dot(DT(H_B_No>, N) + DT(H_A_No>, N) - M_B_No> - M_A_No>,nx>)
-
 % Formulate the second angular momentum principle
-amp[2] = Dot(DT(H_B_Bo>, N) +  Cross(v_Bo_N>,mB*v_Bcm_N>) - M_B_Bo>,az>)
-
+amp[2] = Dot(DT(H_B_Bo>, N) +  Cross(v_Bo_N>,mB*v_Bcm_N>)- M_B_Bo>,az>)
 % Solve system of equtaions
 Solve(amp = 0, qA'', qB'')
-
 KE = System.GetKineticEnergy(N) % good to practice writing out but this was just to check
 PE = mA*g*Dot(P_No_Acm>, nz>) + mB*g*Dot(P_No_Bcm>, nz>)
-
 % Put in all inputs
 Input LA = 7.5 cm
 Input LB = 20 cm
@@ -76,13 +56,8 @@ Input IAxx = 50 g*cm^2, IBxx = 2500 g*cm^2, IByy = 500 g*cm^2, IBzz = 2000 g*cm^
 Input tFinal=20, integStp=0.01 % Integration parameters
 Input qA = 90 degrees, qA' = 0
 Input qB = 1 degrees, qB' = 0
-
 % Create output plots 
 OutputPlot t, qA, qB
 OutputPlot t, KE + PE
 ODE() baby_boot.m
-
-
-
-
 

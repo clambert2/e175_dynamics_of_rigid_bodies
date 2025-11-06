@@ -1,0 +1,127 @@
+   (1) NewtonianFrame N
+   (2) RigidBody A, B 
+   (3) Constant LA, LB, g
+   (4) Variable qA'', qB''
+   (5) % Define point positions
+   (6) p_No_Acm> = -LA*az>
+-> (7) p_No_Acm> = -LA*Az>
+
+   (8) p_No_Bcm> = -LB*az>
+-> (9) p_No_Bcm> = -LB*Az>
+
+   (10) p_No_Bo> = -LA*2*az>
+-> (11) p_No_Bo> = -2*LA*Az>
+
+   (12) % Define rotations
+   (13) A.RotateX(N, qA)
+-> (14) A_N = [1, 0, 0;  0, cos(qA), sin(qA);  0, -sin(qA), cos(qA)]
+-> (15) w_A_N> = qA'*Ax>
+-> (16) alf_A_N> = qA''*Ax>
+
+   (17) B.RotateZ(A, qB)
+-> (18) B_A = [cos(qB), sin(qB), 0;  -sin(qB), cos(qB), 0;  0, 0, 1]
+-> (19) w_B_A> = qB'*Bz>
+-> (20) w_B_N> = qA'*Ax> + qB'*Bz>
+-> (21) alf_B_A> = qB''*Bz>
+-> (22) alf_B_N> = qA''*Ax> - qA'*qB'*Ay> + qB''*Bz>
+
+   (23) % Set mass of objects
+   (24) A.SetMass(mA)
+   (25) B.SetMass(mB)
+   (26) % Find the velocity of Bcm in N
+   (27) Bcm.SetVelocity(N, No)
+-> (28) v_Bcm_N> = LB*qA'*Ay>
+
+   (29) % Find the velocity of Bo in N
+   (30) Bo.SetVelocity(N, No)
+-> (31) v_Bo_N> = 2*LA*qA'*Ay>
+
+   (32) % Find the velocity of Acm in N
+   (33) Acm.SetVelocity(N, No)
+-> (34) v_Acm_N> = LA*qA'*Ay>
+
+   (35) % Inertia Properties for A
+   (36) A.SetInertia(Acm, IAxx, IAxx, 0)
+   (37) I_A_No>> = I_A_Acm>> + mA*(1>>*Dot(p_No_Acm>,p_No_Acm>) - p_No_Acm>*p_No_Acm>) % Shift MOI to about No
+-> (38) I_A_No>> = mA*LA^2*1>> + IAxx*Ax>*Ax> + IAxx*Ay>*Ay> - mA*LA^2*Az>*Az>
+
+   (39) % Find the interta properties for B
+   (40) B.SetInertia(Bcm, IBxx, IByy, IBzz)
+   (41) I_B_Bo>> = I_B_Bcm>> + mB*(1>>*Dot(p_Bo_Bcm>,p_Bo_Bcm>) - p_Bo_Bcm>*p_Bo_Bcm>) % Shift MOI to about Bo
+-> (42) I_B_Bo>> = mB*(2*LA-LB)^2*1>> - mB*(2*LA-LB)^2*Az>*Az> + IBxx*Bx>*Bx>
+        + IByy*By>*By> + IBzz*Bz>*Bz>
+
+   (43) % Find the angular momentum of A about No
+   (44) H_A_No> = Dot(I_A_No>>, w_N_A>)
+-> (45) H_A_No> = -(IAxx+mA*LA^2)*qA'*Ax>
+
+   (46) % Find angular momentum of B about Bo
+   (47) H_B_Bo> = Dot(I_B_Bo>>, w_N_B>) + Cross(p_Bo_Bcm>, mB*v_Bo_N>)
+-> (48) H_B_Bo> = -mB*(2*LA-LB)*(4*LA-LB)*qA'*Ax> - IBxx*cos(qB)*qA'*Bx> + IByy
+        *sin(qB)*qA'*By> - IBzz*qB'*Bz>
+
+   (49) % Fine linear momementum of B in N
+   (50) L_B_N> = mB*v_Bcm_N>
+-> (51) L_B_N> = mB*LB*qA'*Ay>
+
+   (52) % Find angular momentum of B about No
+   (53) H_B_No> = H_B_Bo> + Cross(p_No_Bo>, L_B_N>)
+-> (54) H_B_No> = mB*(2*LA*LB-(2*LA-LB)*(4*LA-LB))*qA'*Ax> - IBxx*cos(qB)*qA'*Bx>
+        + IByy*sin(qB)*qA'*By> - IBzz*qB'*Bz>
+
+   (55) % Create gravitational force vectors
+   (56) F_B_N> = -mB*g*nz>
+-> (57) F_B_N> = -mB*g*Nz>
+
+   (58) F_A_N> = -mA*g*nz>
+-> (59) F_A_N> = -mA*g*Nz>
+
+   (60) % Find moments for all forces about No
+   (61) M_B_No> = Cross(p_No_Bcm>, F_B_N>)
+-> (62) M_B_No> = -mB*g*LB*sin(qA)*Nx>
+
+   (63) M_A_No> = Cross(p_No_Acm>, F_A_N>)
+-> (64) M_A_No> = -mA*g*LA*sin(qA)*Nx>
+
+   (65) % Find moments for all forces about Bo
+   (66) M_B_Bo> = Cross(p_Bcm_Bo>, F_B_N>)
+-> (67) M_B_Bo> = -mB*g*(2*LA-LB)*sin(qA)*Nx>
+
+   (68) % Formulate the first angular momentum principle
+   (69) amp[1] = Dot(DT(H_B_No>, N) + DT(H_A_No>, N) - M_B_No> - M_A_No>,nx>)
+-> (70) amp[1] = g*(mA*LA+mB*LB)*sin(qA) + mB*(2*LA*LB-(2*LA-LB)*(4*LA-LB))*qA''
+        + sin(qB)*(2*IBxx*cos(qB)*qA'*qB'-2*IByy*cos(qB)*qA'*qB'-IByy*sin(qB)*
+        qA'') - IBxx*cos(qB)^2*qA'' - (IAxx+mA*LA^2)*qA''
+
+   (71) % Formulate the second angular momentum principle
+   (72) amp[2] = Dot(DT(H_B_Bo>, N) +  Cross(v_Bo_N>,mB*v_Bcm_N>)- M_B_Bo>,az>)
+-> (73) amp[2] = IByy*sin(qB)*cos(qB)*qA'^2 - IBxx*sin(qB)*cos(qB)*qA'^2 - IBzz*qB''
+
+   (74) % Solve system of equtaions
+   (75) Solve(amp = 0, qA'', qB'')
+-> (76) qA'' = (g*(mA*LA+mB*LB)*sin(qA)+2*(IBxx-IByy)*sin(qB)*cos(qB)*qA'*qB')/
+        (IAxx+IBxx+mA*LA^2-mB*(2*LA*LB-(2*LA-LB)*(4*LA-LB))-(IBxx-IByy)*sin(qB)^2)
+
+-> (77) qB'' = -(IBxx-IByy)*sin(qB)*cos(qB)*qA'^2/IBzz
+
+   (78) KE = System.GetKineticEnergy(N) % good to practice writing out but this was just to check
+-> (79) KE = 0.5*IAxx*qA'^2 + 0.5*IBxx*qA'^2 + 0.5*IBzz*qB'^2 + 0.5*mA*LA^2*qA'^2
+        + 0.5*mB*LB^2*qA'^2 - 0.5*(IBxx-IByy)*sin(qB)^2*qA'^2
+
+   (80) PE = mA*g*Dot(P_No_Acm>, nz>) + mB*g*Dot(P_No_Bcm>, nz>)
+-> (81) PE = -g*(mA*LA+mB*LB)*cos(qA)
+
+   (82) % Put in all inputs
+   (83) Input LA = 7.5 cm
+   (84) Input LB = 20 cm
+   (85) Input g = 9.81 m/s^2, mA = 0.01 kg, mB = 0.1 kg
+   (86) Input IAxx = 50 g*cm^2, IBxx = 2500 g*cm^2, IByy = 500 g*cm^2, IBzz = 2000 g*cm^2
+   (87) Input tFinal=20, integStp=0.01 % Integration parameters
+   (88) Input qA = 90 degrees, qA' = 0
+   (89) Input qB = 1 degrees, qB' = 0
+   (90) % Create output plots 
+   (91) OutputPlot t, qA, qB
+   (92) OutputPlot t, KE + PE
+   (93) ODE() baby_boot.m
+
+   (94) 
