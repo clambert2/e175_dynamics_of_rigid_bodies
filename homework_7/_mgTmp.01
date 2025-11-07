@@ -1,0 +1,124 @@
+   (1) NewtonianFrame N % Define non moving frame
+   (2) RigidFrame A
+   (3) RigidBody C, B % Define bodies for the shaft and rotor
+   (4) Variable theta'', phi'', qC'' % Define all angles
+   (5) % Constant Ixx, Iyy, Izz % Define all inertia quantities
+   (6) Constant g, r, L % Defin all other constants 
+   (7) % Set mass of C
+   (8) C.SetMass(m)
+   (9) % Rotations between frames
+   (10) A.RotateZ(N, -theta) % Rotation between N and A frame
+-> (11) A_N = [cos(theta), -sin(theta), 0;  sin(theta), cos(theta), 0;  0, 0, 1]
+-> (12) w_A_N> = -theta'*Az>
+-> (13) alf_A_N> = -theta''*Az>
+
+   (14) B.RotateX(A, -phi) % Rotation between A frame and B body
+-> (15) B_A = [1, 0, 0;  0, cos(phi), -sin(phi);  0, sin(phi), cos(phi)]
+-> (16) w_B_A> = -phi'*Bx>
+-> (17) w_B_N> = -theta'*Az> - phi'*Bx>
+-> (18) alf_B_A> = -phi''*Bx>
+-> (19) alf_B_N> = phi'*theta'*Ay> - theta''*Az> - phi''*Bx>
+
+   (20) C.RotateZ(B, qC) % Rotation between B and C body
+-> (21) C_B = [cos(qC), sin(qC), 0;  -sin(qC), cos(qC), 0;  0, 0, 1]
+-> (22) w_C_B> = qC'*Cz>
+-> (23) w_C_N> = -theta'*Az> - phi'*Bx> + qC'*Cz>
+-> (24) alf_C_B> = qC''*Cz>
+-> (25) alf_C_N> = phi'*theta'*Ay> - theta''*Az> + (sin(phi)*qC'*theta'-phi'')*Bx>
+        + phi'*qC'*By> + qC''*Cz>
+
+   (26) % Check angular velocity terms
+   (27) Express(w_B_N>, B)
+-> (28) w_B_N> = -phi'*Bx> + sin(phi)*theta'*By> - cos(phi)*theta'*Bz>
+
+   (29) Express(w_C_N>, B)
+-> (30) w_C_N> = -phi'*Bx> + sin(phi)*theta'*By> + (qC'-cos(phi)*theta')*Bz>
+
+   (31) % Define location of Ccm
+   (32) p_No_Ccm> = l*bz>
+-> (33) p_No_Ccm> = L*Bz>
+
+   (34) % Find the velocity of Ccm in N
+   (35) Ccm.SetVelocity(N, No)
+-> (36) v_Ccm_N> = L*sin(phi)*theta'*Bx> + L*phi'*By>
+
+   (37) % Find the Inertia Dyadic of C about Ccm
+   (38) C.SetInertia(Ccm, B, 0.25*m*r^2, 0.25*m*r^2, 0.5*m*r^2)
+   (39) % Find the systems translational momentum
+   (40) L_C_N> = m*v_Ccm_N>
+-> (41) L_C_N> = m*L*sin(phi)*theta'*Bx> + m*L*phi'*By>
+
+   (42) IsLZero> = L_C_N> - C.GetLinearMomentum(N) % Check linear momentum calculation
+-> (43) IsLZero> = 0>
+
+   (44) % Find the systems angular momentum
+   (45) H_C_Ccm_N> = Dot(I_C_Ccm>>, w_C_N>)
+-> (46) H_C_Ccm_N> = -0.25*m*r^2*phi'*Bx> + 0.25*m*r^2*sin(phi)*theta'*By>
+        + 0.5*m*r^2*(qC'-cos(phi)*theta')*Bz>
+
+   (47) H_C_No_N> = H_C_Ccm_N> + Cross(p_No_Ccm>, L_C_N>)
+-> (48) H_C_No_N> = -0.25*m*(r^2+4*L^2)*phi'*Bx> + 0.25*m*(r^2+4*L^2)*sin(phi)*
+        theta'*By> + 0.5*m*r^2*(qC'-cos(phi)*theta')*Bz>
+
+   (49) Express(H_C_No_N>, B) % Express the angular momentum in terms of B
+-> (50) H_C_No_N> = -0.25*m*(r^2+4*L^2)*phi'*Bx> + 0.25*m*(r^2+4*L^2)*sin(phi)*
+        theta'*By> + 0.5*m*r^2*(qC'-cos(phi)*theta')*Bz>
+
+   (51) IsHZero> = H_C_No_N> - C.GetAngularMomentum(No) % Check angular momentum calculation
+-> (52) IsHZero> = 0>
+
+   (53) % Find the systems kinetic engergy
+   (54) KE = 0.5*m*Dot(v_Ccm_N>, v_Ccm_N>) + 0.5*Dot(Dot(w_C_N>, I_C_Ccm>>), w_C_N>)
+-> (55) KE = 0.125*m*(4*L^2*(phi'^2+sin(phi)^2*theta'^2)+r^2*(phi'^2+sin(phi)^2
+        *theta'^2+2*(qC'-cos(phi)*theta')^2))
+
+   (56) IsKEZero = KE - C.GetKineticEnergy() % Check kinetic energy calculation [Not working?]
+-> (57) IsKEZero = KE - 0.125*m*(4*L^2*(phi'^2+sin(phi)^2*theta'^2)+r^2*(phi'^2
+        +sin(phi)^2*theta'^2+2*(qC'-cos(phi)*theta')^2))
+
+   (58) % Formulate the time derivative of angular momentum in N
+   (59) DT_H_C_No_N> = DT(H_C_No_N>, N)
+-> (60) DT_H_C_No_N> = 0.25*m*(4*L^2*sin(phi)*cos(phi)*theta'^2+r^2*sin(phi)*
+        theta'*(2*qC'-cos(phi)*theta')-(r^2+4*L^2)*phi'')*Bx> + 0.25*m*(2*r^2*
+        phi'*qC'+8*L^2*cos(phi)*phi'*theta'+(r^2+4*L^2)*sin(phi)*theta'')*By>
+        + 0.5*m*r^2*(sin(phi)*phi'*theta'+qC''-cos(phi)*theta'')*Bz>
+
+   (61) % Find the external forces and moments on the system
+   (62) F_Ccm_N> = -m*g*nz>
+-> (63) F_Ccm_N> = -m*g*Nz>
+
+   (64) M_C_No_N> = Cross(p_No_Ccm>, F_Ccm_N>)
+-> (65) M_C_No_N> = -m*g*L*sin(phi)*Bx>
+
+   (66) % Create equations for each rotation to solve for each angle
+   (67) zero[1] = Dot(DT_H_C_No_N> - M_C_No_N>, nz>)
+-> (68) zero[1] = 0.25*m*(2*r^2*cos(phi)*(sin(phi)*phi'*theta'+qC''-cos(phi)*
+        theta'')-sin(phi)*(2*r^2*phi'*qC'+8*L^2*cos(phi)*phi'*theta'+(r^2+4*L^2)
+        *sin(phi)*theta''))
+
+   (69) zero[2] = Dot(DT_H_C_No_N> - M_C_No_N>, ax>)
+-> (70) zero[2] = 0.25*m*(4*g*L*sin(phi)+4*L^2*sin(phi)*cos(phi)*theta'^2+r^2*
+        sin(phi)*theta'*(2*qC'-cos(phi)*theta')-(r^2+4*L^2)*phi'')
+
+   (71) zero[3] = Dot(DT_H_C_No_N> - M_C_No_N>, bz>)
+-> (72) zero[3] = 0.5*m*r^2*(sin(phi)*phi'*theta'+qC''-cos(phi)*theta'')
+
+   (73) % Solve for each variable
+   (74) Solve(zero, theta'', phi'', qC'')
+-> (75) theta'' = -2*phi'*(r^2*qC'+4*L^2*cos(phi)*theta')/((r^2+4*L^2)*sin(phi))
+-> (76) phi'' = sin(phi)*(4*g*L+4*L^2*cos(phi)*theta'^2+r^2*theta'*(2*qC'-cos(
+        phi)*theta'))/(r^2+4*L^2)
+-> (77) qC'' = -phi'*((2*r^2+(4*L^2-r^2)*sin(phi)^2)*theta'+2*cos(phi)*(r^2*qC'
+        +4*L^2*cos(phi)*theta'-r^2*cos(phi)*theta'))/((r^2+4*L^2)*sin(phi))
+
+   (78) % Plot the Results
+   (79) Input m = 0.1 kg, r = 0.2 m, L = 0.2 m, g = 9.8 m/s^2
+   (80) Input qc = 0, qc' = 300 rpm
+   (81) Input theta = 0 degrees, theta' = 0
+   (82) Input phi = 20 degrees, phi' = 0
+   (83) Input tFinal = 4, integStp = 0.05
+   (84) OutputPlot t, theta
+   (85) OutputPlot t, phi
+   (86) ODE() hw_11_18_19.m
+
+   (87) 

@@ -81,8 +81,3 @@ Input qB = 1 degrees, qB' = 0
 OutputPlot t, qA, qB
 OutputPlot t, KE + PE
 ODE() baby_boot.m
-
-
-
-
-
