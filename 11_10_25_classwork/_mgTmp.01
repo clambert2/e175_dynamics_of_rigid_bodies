@@ -34,27 +34,22 @@
 
    (27) % % Mass properties and angular momentum ----------
    (28) b.SetMass(m)
-   (29) H> = 2*m*Cross(p_O_b>,v_b_N>)
--> (30) H> = 2*m*L^2*theta'*Az>
-
-   (31) % % Forces and moments ----------------------------
-   (32) M_from_H> = DT(H>, N)
--> (33) M_from_H> = 2*m*L^2*theta''*Az>
-
-   (34) F_Spring> = -k*(sqrt(dot(p_b_P>,p_b_P>)) - h)*b.GetUnitVector(P)
--> (35) F_Spring> = k*L*(-1+h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Ax>
+   (29) % % Forces and moments ----------------------------
+   (30) F_SP> = -k*(sqrt(dot(p_b_P>,p_b_P>)) - h)*b.GetUnitVector(P)
+-> (31) F_SP> = k*L*(-1+h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Ax>
         + k*L*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Nx>
         + h*k*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(theta)-2*L^2*cos(theta)))*Ny>
 
-   (36) M_from_F> = 2*Cross(p_O_b>, F_Spring>) + (Mmotor - c*theta')*Az>
--> (37) M_from_F> = (Mmotor+2*h*k*L*cos(theta)*(1-h/sqrt(h^2+2*L^2-2*h*L*sin(
-        theta)-2*L^2*cos(theta)))-2*k*L^2*sin(theta)*(1-h/sqrt(h^2+2*L^2-2*h*L*
-        sin(theta)-2*L^2*cos(theta)))-c*theta')*Nz>
+   (32) % F_RX> = 
+   (33) % F_RY>
+   (34) % Solve for KE -----------------------
+   (35) KE = 1/2*m*Dot(V_b_N>, V_b_N>)
+-> (36) KE = 0.5*m*L^2*theta'^2
 
-   (38) % Form governing equation -----------------------
-   (39) % Simulation —-----------------------------------
-   (40) Input Tfinal=5
-   (41) Input h=2, L=1, c=5, k=100, Mmotor=10, m=0.5 %assume this is all in consistent SI units
-   (42) Input theta' = 0, theta = 45/180*pi
-   (43) Output t,theta
-   (44) ODE() RodAndSprings
+   (37) % % Simulation —-----------------------------------
+   (38) % Input Tfinal=5
+   (39) % Input h=2, L=1, c=5, k=100, Mmotor=10, m=0.5 %assume this is all in consistent SI units
+   (40) % Input theta' = 0, theta = 45/180*pi
+   (41) % Output t,theta
+   (42) % ODE() RodAndSprings
+   (43) 
